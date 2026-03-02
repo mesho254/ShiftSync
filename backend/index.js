@@ -35,6 +35,22 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Database connection check middleware (skip for health endpoint)
+app.use((req, res, next) => {
+  if (req.path === '/health') {
+    return next();
+  }
+  
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ 
+      error: 'Database connection not ready',
+      message: 'The server is starting up. Please try again in a moment.'
+    });
+  }
+  
+  next();
+});
+
 // Make io accessible to routes
 app.set('io', io);
 
@@ -71,25 +87,26 @@ app.use((err, req, res, next) => {
 // Connect to database and start server
 const PORT = process.env.PORT || 5000;
 
-// Start server first to bind to port (required for Render health checks)
-httpServer.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 Binding to 0.0.0.0:${PORT}`);
-});
-
-// Then connect to database
+// Connect to database first, but don't exit on failure
 connectDB().then((conn) => {
   if (conn) {
     initSocketIO(io);
     startCronJobs();
     console.log('✅ All services initialized');
   } else {
-    console.warn('⚠️  Server started but MongoDB connection failed');
+    console.warn('⚠️  MongoDB connection failed - API will not work');
     console.warn('⚠️  Check MONGO_URI environment variable');
   }
 }).catch(err => {
   console.error('Failed to initialize services:', err);
+});
+
+// Start server (bind to port for Render health checks)
+// Server starts regardless of DB connection status
+httpServer.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Binding to 0.0.0.0:${PORT}`);
 });
 
 export { io };

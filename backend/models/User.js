@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
+    unique: true,  // This creates an index automatically
     lowercase: true,
     trim: true
   },
@@ -68,8 +68,7 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for faster queries
-userSchema.index({ email: 1 });
+// Index for faster queries (email index is created by unique: true above)
 userSchema.index({ role: 1 });
 
 // Hash password before saving
