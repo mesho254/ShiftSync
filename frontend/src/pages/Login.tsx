@@ -70,14 +70,14 @@ export default function Login() {
                     </button>
                 </form>
 
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                {/* <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                     <p className="text-xs text-gray-600 font-semibold mb-2">Demo Credentials:</p>
                     <div className="text-xs text-gray-600 space-y-1">
                         <p>Admin: admin@shiftsync.com / admin123</p>
                         <p>Manager: manager.west@shiftsync.com / manager123</p>
                         <p>Staff: alice@shiftsync.com / staff123</p>
                     </div>
-                </div>
+                </div> */}
             </div>
         </div>
     );
