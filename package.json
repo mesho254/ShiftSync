@@ -1,0 +1,28 @@
+{
+    "name": "shiftsync",
+    "version": "1.0.0",
+    "description": "Staff scheduling application for multi-location restaurants",
+    "scripts": {
+        "install:all": "cd backend && npm install && cd ../frontend && npm install",
+        "dev:backend": "cd backend && npm run dev",
+        "dev:frontend": "cd frontend && npm run dev",
+        "seed": "cd backend && npm run seed",
+        "seed:reset": "cd backend && npm run seed -- --reset",
+        "build:frontend": "cd frontend && npm run build",
+        "test:backend": "cd backend && npm test",
+        "test:frontend": "cd frontend && npm test"
+    },
+    "keywords": [
+        "scheduling",
+        "staff-management",
+        "shift-planning",
+        "restaurant",
+        "workforce-management"
+    ],
+    "author": "ShiftSync Team",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/yourusername/shiftsync.git"
+    }
+}
