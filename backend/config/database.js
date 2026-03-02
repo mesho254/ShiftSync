@@ -20,8 +20,10 @@ const connectDB = async () => {
     
     return conn;
   } catch (error) {
-    console.error(`❌ Error: ${error.message}`);
-    process.exit(1);
+    console.error(`❌ MongoDB Connection Error: ${error.message}`);
+    console.error('Server will start but database operations will fail until connection is established');
+    // Don't exit - let server start anyway for health checks
+    return null;
   }
 };
 

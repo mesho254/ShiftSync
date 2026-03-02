@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import connectDB from './config/database.js';
@@ -49,7 +50,13 @@ app.use('/api/audit', auditRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    database: dbStatus,
+    port: PORT
+  });
 });
 
 // Error handling middleware
@@ -64,17 +71,25 @@ app.use((err, req, res, next) => {
 // Connect to database and start server
 const PORT = process.env.PORT || 5000;
 
-connectDB().then(() => {
-  initSocketIO(io);
-  startCronJobs();
-  
-  httpServer.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-  });
+// Start server first to bind to port (required for Render health checks)
+httpServer.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Binding to 0.0.0.0:${PORT}`);
+});
+
+// Then connect to database
+connectDB().then((conn) => {
+  if (conn) {
+    initSocketIO(io);
+    startCronJobs();
+    console.log('✅ All services initialized');
+  } else {
+    console.warn('⚠️  Server started but MongoDB connection failed');
+    console.warn('⚠️  Check MONGO_URI environment variable');
+  }
 }).catch(err => {
-  console.error('Failed to start server:', err);
-  process.exit(1);
+  console.error('Failed to initialize services:', err);
 });
 
 export { io };

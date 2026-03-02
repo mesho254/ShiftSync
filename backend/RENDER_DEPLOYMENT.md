@@ -45,7 +45,7 @@ git push origin main
 In the Render dashboard, add these environment variables:
 
 ```
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/shiftsync
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/shiftsync
 JWT_SECRET=your-super-secret-jwt-key-min-32-chars
 JWT_REFRESH_SECRET=your-super-secret-refresh-key-min-32-chars
 FRONTEND_URL=https://your-frontend-url.vercel.app
@@ -55,8 +55,9 @@ PORT=5000
 
 **Important**: 
 - Don't include quotes around values
-- Make sure MongoDB URI is correct
+- Make sure MongoDB URI is correct (use `MONGO_URI` not `MONGODB_URI`)
 - JWT secrets should be long random strings
+- **CRITICAL**: The server will start even if MongoDB connection fails (to pass Render health checks), but the app won't work without a valid database connection. Check logs if you see "MongoDB Connection Error".
 
 ### Step 4: Deploy
 
@@ -79,9 +80,12 @@ Expected response:
 {
   "status": "ok",
   "timestamp": "2024-01-01T00:00:00.000Z",
-  "environment": "production"
+  "database": "connected",
+  "port": 5000
 }
 ```
+
+If `database` shows `"disconnected"`, check your `MONGO_URI` environment variable in Render.
 
 ---
 
@@ -118,12 +122,20 @@ git push
 
 **Check**:
 1. MongoDB Atlas allows connections from anywhere (0.0.0.0/0)
-2. MONGODB_URI environment variable is correct
+2. `MONGO_URI` environment variable is correct (not `MONGODB_URI`)
 3. Database user has proper permissions
+4. Connection string includes database name
 
 **Fix in MongoDB Atlas**:
 - Go to Network Access
 - Add IP Address: `0.0.0.0/0` (Allow from anywhere)
+
+**Check Render Logs**:
+```
+❌ MongoDB Connection Error: ...
+⚠️  Server started but MongoDB connection failed
+```
+If you see this, the server is running but can't connect to MongoDB.
 
 ### CORS Errors
 
@@ -193,7 +205,7 @@ Render automatically deploys when you push to your main branch.
 
 | Variable | Required | Example | Description |
 |----------|----------|---------|-------------|
-| MONGODB_URI | ✅ Yes | `mongodb+srv://...` | MongoDB connection string |
+| MONGO_URI | ✅ Yes | `mongodb+srv://...` | MongoDB connection string |
 | JWT_SECRET | ✅ Yes | `your-secret-key-32-chars-min` | JWT signing secret |
 | JWT_REFRESH_SECRET | ✅ Yes | `your-refresh-secret-32-chars` | Refresh token secret |
 | FRONTEND_URL | ✅ Yes | `https://app.vercel.app` | Frontend URL for CORS |
