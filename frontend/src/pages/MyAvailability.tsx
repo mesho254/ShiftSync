@@ -19,7 +19,6 @@ const DAYS_OF_WEEK = [
 export default function MyAvailability() {
     const [showRecurringModal, setShowRecurringModal] = useState(false);
     const [showOneOffModal, setShowOneOffModal] = useState(false);
-    const [editingAvailability, setEditingAvailability] = useState<any>(null);
     const queryClient = useQueryClient();
     const currentUser = getCurrentUser();
 
@@ -41,7 +40,6 @@ export default function MyAvailability() {
             queryClient.invalidateQueries({ queryKey: ['currentUser'] });
             setShowRecurringModal(false);
             setShowOneOffModal(false);
-            setEditingAvailability(null);
         },
         onError: (error: any) => {
             toast.error(error.response?.data?.error || 'Failed to update availability');
